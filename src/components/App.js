@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import RegisterationForm from './RegisterationForm';
+import RegistrationForm from './RegistrationForm';
 
 
 class App extends Component {
@@ -20,7 +20,7 @@ class App extends Component {
   render() {
     return (
       <div style={{ textAlign: 'center', width: '100%', height: '100%' }}>
-        <RegisterationForm onSubmit={this.submit} />
+        <RegistrationForm onSubmit={this.submit} />
       </div>
     );
   }

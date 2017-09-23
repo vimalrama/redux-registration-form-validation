@@ -29,7 +29,7 @@ const validate = (values, props) => {
 };
 
 
-class RegisterationForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class RegistrationForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.state = {
@@ -51,7 +51,7 @@ class RegisterationForm extends React.Component { // eslint-disable-line react/p
       return;
     }
     this.props.dispatch({ type: 'ADD_ACCOUNT', bankAccount });
-    this.props.dispatch(change('registeration', 'bankAccount', {}));
+    this.props.dispatch(change('registration', 'bankAccount', {}));
     this.hideBankAccountsForm();
   }
 
@@ -71,7 +71,7 @@ class RegisterationForm extends React.Component { // eslint-disable-line react/p
     return (
       <Paper style={{padding: '20px', width:'600px', marginLeft:'auto', marginRight:'auto'}}>
         <form onSubmit={handleSubmit}>
-          <h2>Registeration Form</h2>
+          <h2>Registration Form</h2>
           <div>
             <Field
               name="firstName"
@@ -163,11 +163,11 @@ class RegisterationForm extends React.Component { // eslint-disable-line react/p
 }
 
 const mapState = state => ({
-  formData: state.form.registeration,
+  formData: state.form.registration,
   bankAccounts: state.bankAccounts,
 });
 
 export default connect(mapState)(reduxForm({
-  form: 'registeration',
+  form: 'registration',
   validate,
-})(RegisterationForm));
+})(RegistrationForm));
