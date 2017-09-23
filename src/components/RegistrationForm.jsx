@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Field, reduxForm, FormSection, change } from 'redux-form';
 import { TextField } from 'redux-form-material-ui';
 import RaisedButton from 'material-ui/RaisedButton';
-import { Card, CardActions, CardHeader, CardMedia, CardTitle, CardText } from 'material-ui/Card';
+import { Card, CardActions } from 'material-ui/Card';
 import Paper from 'material-ui/Paper';
 import Chip from 'material-ui/Chip';
 import renderField from './renderField';
