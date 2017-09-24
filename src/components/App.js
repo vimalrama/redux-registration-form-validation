@@ -10,7 +10,7 @@ class App extends Component {
       bankAccounts: this.props.bankAccounts,
     };
     function replacer(key, value) {
-      if (key == 'bankAccount') return undefined;
+      if (key == 'bankAccount' || key == 'validate') return undefined;
       return value;
     }
     // alert(JSON.stringify({ ...values, ...{ bankAccounts: this.props.bankAccounts } }), null, ' ');
