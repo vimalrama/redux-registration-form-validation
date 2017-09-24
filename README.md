@@ -1,6 +1,6 @@
 A not-so-straight-forward example of a using Redux-Form's SyncValidation to validate a form with nested levels (`FormSection`s), while showing errors on both the top and the bottom levels, and manually triggering validation by dispatching a redux action.
 
-The requirements are deceptivley simple. The form should validate that a user added his name, a valid email, and at least one bank account.
+The requirements are deceptively simple. The form should validate that a user added his name, a valid email, and at least one bank account.
 
 At first glance, one might want to use a nested form with seperate validation to enter the bank account details. But [Redux-Form does not support nested forms](https://github.com/erikras/redux-form/issues/2446#issuecomment-272501744).
 
