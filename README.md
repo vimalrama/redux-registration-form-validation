@@ -16,7 +16,7 @@ The `bankAccounts` virtual field is used to display an error on the top level co
 <Field
   name="bankAccounts"
   type="text"
-  component={({ meta: { touched, error } }) => <span style={{ fontSize: '12px', color: 'rgb(244, 67, 54)' }}>{touched && error}</span>}
+  component={({ meta: { touched, error } }) => <span>{touched && error}</span>}
 />
 ```
 
