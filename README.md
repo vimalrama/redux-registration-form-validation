@@ -1,16 +1,16 @@
-A not-so-straight-forward example of a using Redux-Form's SyncValidation to validate a form with nested levels (`FormSection`s), while showing errors on both the top and the bottom levels, and manually triggering validation by dispatching a redux action.
+This is an example of a using Redux-Form’s SyncValidation to validate a form with nested levels, while showing errors on both levels, and manually triggering validation by dispatching a redux action. I struggled to find examples of fixing these issues, so I decided to share this small project with the community.
 
-The requirements are deceptively simple. The form should validate that a user added his name, a valid email, and at least one bank account.
+The requirements are deceptively simple. The form should validate that a user added his name, a valid email, and one or more bank accounts. Every bank account should have two fields, an IBAN and the bank name.
 
 At first glance, one might want to use a nested form with seperate validation to enter the bank account details. But [Redux-Form does not support nested forms](https://github.com/erikras/redux-form/issues/2446#issuecomment-272501744).
 
-Instead, Redux-Form has a concept of [`FormSection`](https://redux-form.com/7.0.4/docs/api/formsection.md/)s, which is quite nice, except that [it does not support validation](https://github.com/erikras/redux-form/issues/2150).
+Instead, Redux-Form has a concept of [`FormSection`](https://redux-form.com/7.0.4/docs/api/formsection.md/)s, which is quite nice, except that [it does not fully support validation](https://github.com/erikras/redux-form/issues/2150). We need to be able to validate the bank details fields when the users adds a new bank without having to validate the whole form.
 
-On top of that, Redux-Form's [SyncValidation does not provide an api to manually trigger validation](https://stackoverflow.com/questions/40886568/how-to-re-trigger-validations-manually-in-reduxform). Which we will need at various points in our app to validate the nested bank details form, and the bank accounts.
+On top of that, Redux-Form's [SyncValidation does not provide an api to manually trigger validation](https://stackoverflow.com/questions/40886568/how-to-re-trigger-validations-manually-in-reduxform). Which we will need at various points in our app to validate the nested bank details field, and the number of bank accounts.
 
-The example takes advantage of Redux-Form's SyncValidation, and redux-form-material-ui components, while customizing the validation to match the requirements.
+**The trick is to use ‘virtual fields’, which are basically normal redux-form Fields, but mainly used to manipulate the validation process, showing only validation error messages without an input, or sometimes showing nothing at all.**
 
-The code is well-commented. The `bankAccounts` virtual field is used to display an error on the top level component. Its job is to make sure the user has entered at least one bank account. It validates using the props received from the redux state. In the component prop, we only show the error message obtained from redux-form.
+The `bankAccounts` virtual field is used to display an error on the top level component. Its job is to make sure the user has entered at least one bank account. It validates using the props received from redux store using react-redux’s connect. In the component prop, we only show the error message obtained from redux-form.
 
 ```jsx
 <Field
@@ -20,9 +20,9 @@ The code is well-commented. The `bankAccounts` virtual field is used to display 
 />
 ```
 
-To add the bank accounts, we used a FormSection. This gives us the desired nesting of the bank account details. The individual fields will be at `values.bankAccount.IBAN` and `values.bankAccount.BankName`. We need to validate the individual field values of the FormSection (for example: prevent saving if the IBAN is invalid, we can validate the IBAN using https://github.com/arhs/iban.js). We also want to hide the inner validations when the bank details form is hidden.
+To add the bank accounts, we used a FormSection. This gives us the desired nesting of the bank account details. The individual fields will be at `values.bankAccount.IBAN` and `values.bankAccount.bankName`. We need to validate the individual field values of the `FormSection` (for example: prevent saving if the IBAN is invalid, we can validate the IBAN using https://github.com/arhs/iban.js). We also want to hide the inner validations when the bank details form is hidden.
 
-We use another virtual field `validate` to manually trigger validation at various points. For example, when removing all the added bank accounts, redux-form will not trigger validation because they were not added inside the form `values`. They were added in Redux state. So we need a way to tell Redux-Form that something changed and we need to run the validation again. All we need is to dispatch a `change` or `blur` action on a registered field. So we add a virtual field:
+Since we are saving the bank accounts out of redux-form, we need a way to integrate them with its validation. We use another virtual field `validate` to manually trigger validation at various points. For example, when removing all the added bank accounts, redux-form will not trigger validation because they were not added inside the form’s `values`. So we need a way to tell Redux-Form that something changed and we need to run the validation again. All we need is to dispatch a `change` or `blur` action on a field inside our form. So we add a virtual field that doesn’t display anything:
 
 ```jsx
 <Field
@@ -33,19 +33,21 @@ We use another virtual field `validate` to manually trigger validation at variou
 />
 ```
 
-Now we can trigger validation by dispatching a redux action, using one of Redux-Form's exported action creators: Blur.
+Now we can trigger validation by dispatching a redux action, using one of Redux-Form’s exported action creators: blur.
 
 ```js
 this.props.dispatch(blur('registration', 'validate', Math.random()));
 ```
 
-In some cases, we only want to show the errors on the bank details form. (for example, all the form is empty, and the user clicks Save Bank, while all the fields are still untouched). Redux-Form advises to only show error messages when the Field is `touched`. And this is the implemented standard in redux-form-material-ui. By default, when the form is submitted, Redux-Form calls `touch` on all the fields. So we cannot use `handleSubmit()` here. So, we need to `touch` the bank details form fields to show the errors. We use the exported `touch` action creator from redux-form.
+In some cases, we only want to validate the bank details fields. (for example, all the form is empty, and the user clicks Save Bank, while all the fields are still untouched, we wouldn’t want to show validation errors on the name/email fields). Redux-Form advises to only show error messages when the Field is `touched`. And this is the implemented standard in redux-form-material-ui. By default, when the form is submitted, Redux-Form calls `touch` on all the fields. So we cannot use `handleSubmit()` here to trigger the validation. Instead, to `touch` the bank details form fields we dispatch the exported `touch` action creator from redux-form.
 
 ```js
 this.props.dispatch(touch('registration', 'bankAccount.IBAN', 'bankAccount.bankName'));
 ```
 
-Then in the submit function, we combine the values generated by redux-form and the bankAccounts from the redux-state to create the desired output.
+Then in the submit function, we combine the values generated by redux-form and the bankAccounts from the redux store to create the desired output.
+
+**TL;DR: Since the validate function supplied to the reduxForm HOC receives the form’s props as its second argument, we can validate anything we want even if it’s not directly inside the form’s field values, and make use of Redux-Form’s Field to show error messages. In this case, we may need to manually trigger validation, which we can accomplish by dispatching a change/blur action on a virtual Field inside the form.**
 
 You can play around with the form at https://mohamed-ismat.github.io/redux-registeration-form-validation/ . 
 
